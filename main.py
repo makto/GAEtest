@@ -1,24 +1,48 @@
 #!/usr/bin/env python
 #
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+
+import cgi
+import os
+
+from google.appengine.ext.webapp import template
 import webapp2
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
         self.response.out.write('Hello, Udacity!')
 
-app = webapp2.WSGIApplication([('/', MainHandler)],
-                              debug=True)
+        
+class Rot13Handler(webapp2.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), 'rot13.html')
+        self.response.out.write(template.render(path, {}))
+    
+    def post(self):
+        raw_text = self.request.get('text')
+        trans_text = []
+        
+        for letter in raw_text:
+            ord_of_letter = ord(letter)
+            if 90 >= ord_of_letter >= 65:
+                new_ord = ord_of_letter + 13
+                if new_ord > 90:
+                    new_ord = new_ord % 90 + 64
+                new_letter = chr(new_ord)
+            elif 122 >= ord_of_letter >= 97:
+                new_ord = ord_of_letter + 13
+                if new_ord > 122:
+                    new_ord = new_ord % 122 + 96
+                new_letter = chr(new_ord)
+            else:
+                new_letter = letter
+            trans_text.append(new_letter)
+        
+        paras = {'trans_text' : ''.join(trans_text)}
+        
+        path = os.path.join(os.path.dirname(__file__), 'rot13.html')
+        self.response.out.write(template.render(path, paras))
+
+app = webapp2.WSGIApplication([
+            ('/', MainHandler),
+            ('/rot13/', Rot13Handler)
+        ], debug=True)
