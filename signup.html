@@ -1,0 +1,23 @@
+﻿<html>
+
+<head>
+<title>Signup</title>
+</head>
+
+<body>
+
+<form action="" method="POST">
+username: <input type="text" name="username" value="{{ raw_username }}"/>
+{{ error_username }}<br />
+password: <input type="password" name="password" />
+{{ error_password }}<br />
+verify password: <input type="password" name="verify" />
+{{ error_verify }}<br />
+email(optional): <input type="text" name="email" value="{{ raw_email }}"/>
+{{ error_email }}<br />
+<input type="submit" value="submit" />
+</form>
+
+</body>
+
+</html>
