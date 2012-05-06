@@ -1,0 +1,22 @@
+﻿<html>
+
+<head>
+<title>Create a new post</title>
+</head>
+
+<body>
+
+<h1>New Post</h1>
+
+<form action="" method="POST">
+<label>subject<input type="text" name="subject" value="{{ subject_raw }}" /></label>
+<br />
+<label>content<textarea name="content" cols="40" rows="15">{{ content_raw }}</textarea></label>
+<br />
+<p>{{ error }}</p>
+<input type="submit" value="post" />
+</form>
+
+</body>
+
+</html>

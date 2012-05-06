@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import cgi
 import os
 import re
 
 from google.appengine.ext.webapp import template
+from google.appengine.ext import db
 import webapp2
 
 class MainHandler(webapp2.RequestHandler):
@@ -90,10 +90,49 @@ class WelcomeHandler(webapp2.RequestHandler):
         username = self.request.get("username")
         self.response.out.write("Welcome, %s" % username)
     
+class Blog(db.Model):
+    subject = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    datetime = db.DateTimeProperty(auto_now_add = True)
+
+class BlogHandler(webapp2.RequestHandler):
+    def get(self):
+        blogs = db.GqlQuery("select * from Blog order by datetime desc")
+        path = os.path.join(os.path.dirname(__file__), 'blog.html')
+        self.response.out.write(template.render(path, {'posts' : blogs}))
     
+    
+class CreatePostHandler(webapp2.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), 'blog_create.html')
+        self.response.out.write(template.render(path, {}))
+    
+    def post(self):
+        path = os.path.join(os.path.dirname(__file__), 'blog_create.html')
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+        if not ( subject and content ):
+            self.response.out.write(template.render(path, 
+                {'subject_raw' : subject, 'content_raw' : content, 'error' : 'no blank!'}))
+        else:
+            new_post = Blog(subject = subject, content = content)
+            tmp = new_post.put()
+            self.redirect('/blog/%d' % tmp.id())
+
+
+class EntryHandler(webapp2.RequestHandler):
+    def get(self, post_id):
+        path = os.path.join(os.path.dirname(__file__), 'blog_entry.html')
+        post = Blog.get_by_id(int(post_id))
+        self.response.out.write(template.render(path, {'post' : post}))
+
+
 app = webapp2.WSGIApplication([
             ('/', MainHandler),
             ('/rot13/', Rot13Handler),
             ('/signup/', SignupHandler),
-            ('/welcome/', WelcomeHandler)
+            ('/welcome/', WelcomeHandler),
+            ('/blog', BlogHandler),
+            ('/blog/newpost', CreatePostHandler),
+            ('/blog/(\d+)', EntryHandler)
         ], debug=True)

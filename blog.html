@@ -1,0 +1,19 @@
+﻿<html>
+
+<head>
+<title>Blog</title>
+</head>
+
+<body>
+
+<h1>Simple Blog</h1>
+
+{% for post in posts %}
+<h2>{{ post.subject }}</h2>
+<p>{{ post.datetime }}</p>
+<p>{{ post.content }}</p>
+{% endfor %}
+
+</body>
+
+</html>
